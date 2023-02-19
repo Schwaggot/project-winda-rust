@@ -1,28 +1,28 @@
-use crate::Gender;
+use crate::person;
 
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
-use rand::Rng;
+use rand::seq::SliceRandom;
+use person::Gender;
 
 
+#[derive(Debug)]
 pub(crate) struct NameGenerator {
-    rng: rand::rngs::ThreadRng,
     male_names: Vec<String>,
-    female_names: Vec<String>
+    female_names: Vec<String>,
 }
 
 impl NameGenerator {
     pub fn new() -> NameGenerator {
         NameGenerator {
-            rng: rand::thread_rng(),
             male_names: Self::load_names(Gender::Male),
-            female_names: Self::load_names(Gender::Female)
+            female_names: Self::load_names(Gender::Female),
         }
     }
 
     fn load_names(gender: Gender) -> Vec<String> {
-        let file_name = if gender == Gender::Male {"male_names.txt"} else {"female_names.txt"};
+        let file_name = if gender == Gender::Male { "male_names.txt" } else { "female_names.txt" };
         let file_path = format!("data/cmu-name-corpus/{}", file_name);
 
         let mut names = Vec::new();
@@ -48,6 +48,14 @@ impl NameGenerator {
         where P: AsRef<Path>, {
         let file = File::open(filename)?;
         Ok(io::BufReader::new(file).lines())
+    }
+
+    pub fn generate_name(self, gender: Gender) -> String {
+        if gender == Gender::Male {
+            self.male_names.choose(&mut rand::thread_rng()).unwrap().clone()
+        } else {
+            self.female_names.choose(&mut rand::thread_rng()).unwrap().clone()
+        }
     }
 }
 
